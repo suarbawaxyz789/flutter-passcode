@@ -7,6 +7,9 @@ import 'package:passcode_screen/circle.dart';
 import 'package:passcode_screen/keyboard.dart';
 import 'package:passcode_screen/shake_curve.dart';
 
+export 'circle.dart';
+export 'keyboard.dart';
+
 typedef PasswordEnteredCallback = void Function(String text);
 typedef IsValidCallback = void Function();
 typedef CancelCallback = void Function();
@@ -49,7 +52,8 @@ class PasscodeScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _PasscodeScreenState();
 }
 
-class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProviderStateMixin {
+class _PasscodeScreenState extends State<PasscodeScreen>
+    with SingleTickerProviderStateMixin {
   StreamSubscription<bool> streamSubscription;
   String enteredPasscode = '';
   AnimationController controller;
@@ -58,9 +62,12 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
   @override
   initState() {
     super.initState();
-    streamSubscription = widget.shouldTriggerVerification.listen((isValid) => _showValidation(isValid));
-    controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
-    final Animation curve = CurvedAnimation(parent: controller, curve: ShakeCurve());
+    streamSubscription = widget.shouldTriggerVerification
+        .listen((isValid) => _showValidation(isValid));
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    final Animation curve =
+        CurvedAnimation(parent: controller, curve: ShakeCurve());
     animation = Tween(begin: 0.0, end: 10.0).animate(curve)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
@@ -88,7 +95,10 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
             Text(
               widget.title,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, color: widget.titleColor, fontWeight: FontWeight.w300),
+              style: TextStyle(
+                  fontSize: 20,
+                  color: widget.titleColor,
+                  fontWeight: FontWeight.w300),
             ),
             Container(
               margin: const EdgeInsets.only(top: 20, left: 60, right: 60),
@@ -102,12 +112,16 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
               child: Container(
                 margin: const EdgeInsets.only(top: 20, left: 40, right: 40),
                 child: Keyboard(
+                  onCompleteTap: _onCompleteTap,
+                  onCancelTap: _onDeleteCancelButtonPressed,
                   onDeleteCancelTap: _onDeleteCancelButtonPressed,
                   onKeyboardTap: _onKeyboardButtonPressed,
                   shouldShowCancel: enteredPasscode.length == 0,
                   cancelLocalizedText: widget.cancelLocalizedText,
                   deleteLocalizedText: widget.deleteLocalizedText,
-                  keyboardUIConfig: widget.keyboardUIConfig != null ? widget.keyboardUIConfig : KeyboardUIConfig(),
+                  keyboardUIConfig: widget.keyboardUIConfig != null
+                      ? widget.keyboardUIConfig
+                      : KeyboardUIConfig(),
                 ),
               ),
             ),
@@ -120,7 +134,9 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
 
   List<Widget> _buildCircles() {
     var list = <Widget>[];
-    var config = widget.circleUIConfig != null ? widget.circleUIConfig : CircleUIConfig();
+    var config = widget.circleUIConfig != null
+        ? widget.circleUIConfig
+        : CircleUIConfig();
     config.extraSize = animation.value;
     for (int i = 0; i < widget.passwordDigits; i++) {
       list.add(Circle(
@@ -134,7 +150,8 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
   _onDeleteCancelButtonPressed() {
     if (enteredPasscode.length > 0) {
       setState(() {
-        enteredPasscode = enteredPasscode.substring(0, enteredPasscode.length - 1);
+        enteredPasscode =
+            enteredPasscode.substring(0, enteredPasscode.length - 1);
       });
     } else {
       Navigator.maybePop(context);
@@ -156,21 +173,26 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
     });
   }
 
+  _onCompleteTap() {
+    widget.passwordEnteredCallback(enteredPasscode);
+  }
+
   @override
   didUpdateWidget(PasscodeScreen old) {
     super.didUpdateWidget(old);
     // in case the stream instance changed, subscribe to the new one
     if (widget.shouldTriggerVerification != old.shouldTriggerVerification) {
       streamSubscription.cancel();
-      streamSubscription = widget.shouldTriggerVerification.listen((isValid) => _showValidation(isValid));
+      streamSubscription = widget.shouldTriggerVerification
+          .listen((isValid) => _showValidation(isValid));
     }
   }
 
   @override
   dispose() {
+    super.dispose();
     controller.dispose();
     streamSubscription.cancel();
-    super.dispose();
   }
 
   _showValidation(bool isValid) {
@@ -185,7 +207,8 @@ class _PasscodeScreenState extends State<PasscodeScreen> with SingleTickerProvid
     if (widget.isValidCallback != null) {
       widget.isValidCallback();
     } else {
-      print("You didn't implement validation callback. Please handle a state by yourself then.");
+      print(
+          "You didn't implement validation callback. Please handle a state by yourself then.");
     }
   }
 }

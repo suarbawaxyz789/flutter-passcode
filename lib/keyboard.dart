@@ -20,9 +20,9 @@ class KeyboardUIConfig {
     this.digitFillColor = Colors.transparent,
     this.digitTextStyle = const TextStyle(fontSize: 30, color: Colors.white),
     this.deleteButtonMargin =
-        const EdgeInsets.only(right: 25, left: 20, top: 15),
+    const EdgeInsets.only(right: 25, left: 20, top: 15),
     this.deleteButtonTextStyle =
-        const TextStyle(fontSize: 16, color: Colors.white),
+    const TextStyle(fontSize: 16, color: Colors.white),
   });
 }
 
@@ -33,15 +33,19 @@ class Keyboard extends StatelessWidget {
   final bool shouldShowCancel;
   final String cancelLocalizedText;
   final String deleteLocalizedText;
+  final GestureTapCallback onCancelTap;
+  final GestureTapCallback onCompleteTap;
 
   Keyboard(
       {Key key,
-      @required this.keyboardUIConfig,
-      @required this.onDeleteCancelTap,
-      @required this.onKeyboardTap,
-      this.shouldShowCancel = true,
-      @required this.cancelLocalizedText,
-      @required this.deleteLocalizedText})
+        @required this.keyboardUIConfig,
+        @required this.onDeleteCancelTap,
+        @required this.onCancelTap,
+        @required this.onCompleteTap,
+        @required this.onKeyboardTap,
+        this.shouldShowCancel = true,
+        @required this.cancelLocalizedText,
+        @required this.deleteLocalizedText})
       : super(key: key);
 
   @override
@@ -75,10 +79,12 @@ class Keyboard extends StatelessWidget {
             _buildKeyboardDigit('9'),
           ],
         ),
-        Stack(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Center(child: _buildKeyboardDigit('0')),
-            Align(alignment: Alignment.topRight, child: _buildDeleteButton())
+            _buildCancelButton(),
+            _buildKeyboardDigit('0'),
+            _buildOkButton(),
           ],
         ),
       ],
@@ -117,25 +123,67 @@ class Keyboard extends StatelessWidget {
     );
   }
 
-  Widget _buildDeleteButton() {
+  Widget _buildOkButton() {
     return Container(
-      margin: keyboardUIConfig.deleteButtonMargin,
-      height: keyboardUIConfig.digitSize,
+      margin: keyboardUIConfig.keyboardRowMargin,
       width: keyboardUIConfig.digitSize,
+      height: keyboardUIConfig.digitSize,
       child: ClipOval(
         child: Material(
           color: keyboardUIConfig.digitFillColor,
           child: InkWell(
             highlightColor: keyboardUIConfig.primaryColor,
             splashColor: keyboardUIConfig.primaryColor.withOpacity(0.4),
-            onTap: onDeleteCancelTap,
+            onTap: () {
+              this.onCompleteTap();
+            },
             child: Center(
-              child: Text(
-                shouldShowCancel ? cancelLocalizedText : deleteLocalizedText,
-                style: keyboardUIConfig.deleteButtonTextStyle,
+              child: Icon(
+                Icons.check,
+                color: Colors.green,
               ),
             ),
           ),
+        ),
+      ),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+            color: keyboardUIConfig.primaryColor,
+            width: keyboardUIConfig.digitBorderWidth),
+      ),
+    );
+  }
+
+
+  Widget _buildCancelButton() {
+    return Container(
+      margin: keyboardUIConfig.keyboardRowMargin,
+      width: keyboardUIConfig.digitSize,
+      height: keyboardUIConfig.digitSize,
+      child: ClipOval(
+        child: Material(
+          color: keyboardUIConfig.digitFillColor,
+          child: InkWell(
+            highlightColor: keyboardUIConfig.primaryColor,
+            splashColor: keyboardUIConfig.primaryColor.withOpacity(0.4),
+            onTap: () {
+              this.onCancelTap();
+            },
+            child: Center(
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ),
+      ),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: keyboardUIConfig.primaryColor,
+          width: keyboardUIConfig.digitBorderWidth,
         ),
       ),
     );
